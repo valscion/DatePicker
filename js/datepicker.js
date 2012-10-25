@@ -13,7 +13,7 @@
  * This project is distinct from and not affiliated with the jquery.ui.datepicker.
  * 
  * Copyright 2012, Justin Stern (www.foxrunsoftware.net)
- * Dual licensed under the MIT and GPL Version 2 licenses.
+  * Dual licensed under the MIT and GPL Version 2 licenses.
  * 
  * Based on Work by Original Author: Stefan Petre www.eyecon.ro
  * 
@@ -205,7 +205,7 @@
          *         disabled: if true, date cell will be disabled
          *         className: css class name to add to the cell
          */
-        onRenderCell: function() { return {} },
+        onRenderCell: function() {return {}},
         /* 
          * Callback, invoked when a date is selected, with 'this' referring to
          * the HTMLElement that DatePicker was invoked upon.
@@ -225,7 +225,7 @@
          * @param HTMLDivElement el The datepicker container element, ie the div with class 'datepicker'
          * @return true to allow the datepicker to be shown, false to keep it hidden
          */
-        onBeforeShow: function() { return true },
+        onBeforeShow: function() {return true},
         /**
          * Invoked after a non-inline datepicker is shown, with 'this'
          * referring to the HTMLElement that DatePicker was invoked upon, ie
@@ -242,7 +242,7 @@
          * @param HTMLDivElement el The datepicker container element, ie the div with class 'datepicker'
          * @return true to allow the datepicker to be hidden, false to keep it visible
          */
-        onBeforeHide: function() { return true },
+        onBeforeHide: function() {return true},
         /**
          * Invoked after a non-inline datepicker is hidden, with 'this'
          * referring to the HTMLElement that DatePicker was invoked upon, ie
@@ -449,6 +449,7 @@
         var tbl = cal.find('table:first').get(0);
         var width = tbl.offsetWidth;
         var height = tbl.offsetHeight;
+		/*
         cal.css({
           width: width + options.extraWidth + 'px',
           height: height + options.extraHeight + 'px'
@@ -456,6 +457,7 @@
           width: width + 'px',
           height: height + 'px'
         });
+		*/
       },
       
       /**
@@ -464,6 +466,7 @@
        * the title, next/previous, or a date cell is clicked on.
        */
       click = function(ev) {
+		ev.preventDefault();
         if ($(ev.target).is('span')) {
           ev.target = ev.target.parentNode;
         }

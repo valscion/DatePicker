@@ -16,6 +16,9 @@ body {
     float: left;
     width: 200px;
 }
+.pickerContainer.widget {
+	width: 230px;
+}
 
 div.comment {
     margin: -15px 0 10px 0;

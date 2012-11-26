@@ -301,7 +301,7 @@
 							'<input type="text" class="dr dr1 from" lastSel="0" /> - <input type="text" class="dr dr1 to" lastSel="1" />'+
 						'</div>'+
 						'<div>'+
-							'<input type="checkbox" checked="checked" class="enable-comparison" /> <label for="enableComparison">Compare to:</label>'+
+							'<input type="checkbox" checked="checked" class="enable-comparison" /> Compare to:'+
 							'<select class="comparison-preset">'+
 								'<option value="custom">Custom</option>'+
 								'<option value="previousperiod" selected="selected">Previous period</option>'+
@@ -311,8 +311,8 @@
 						'<div class="comparison-daterange">'+
 							'<input type="text" class="dr dr2 from" lastSel="2" /> - <input type="text" class="dr dr2 to" lastSel="3" />'+
 						'</div>'+
-						'<button class="ok">Ok</button>'+
-						'<button class="cancel">Cancel</button>'+
+						'<button class="btn btn-small">Ok</button>'+
+						'<button class="btn btn-small">Cancel</button>'+
 					'</div>'+
 				'</div>');
 				$dropdown.appendTo($('body'));

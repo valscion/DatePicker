@@ -362,9 +362,18 @@
             var fromUser = options.onRenderCell(el, date);
             var val = date.valueOf();
             if(options.date && (!$.isArray(options.date) || options.date.length > 0)) {
-              if (fromUser.selected || options.date == val || $.inArray(val, options.date) > -1 || (options.mode == 'range' && val >= options.date[0] && val <= options.date[1])) {
-                data.weeks[indic].days[indic2].classname.push('datepickerSelected');
-              }
+			  if (options.mode != 'tworanges') {
+				if (fromUser.selected || options.date == val || ($.isArray(options.date) && $.inArray(val, options.date.slice(0,2)) > -1) || (options.mode == 'range' && val >= options.date[0] && val <= options.date[1])) {
+					data.weeks[indic].days[indic2].classname.push('datepickerSelected');
+				}
+			  } else {
+			    if ((val >= options.date[0] && val <= options.date[1]) || (val == options.date[0])) {
+                  data.weeks[indic].days[indic2].classname.push('datepickerSelected');
+                }
+				if ((val >= options.date[2] && val <= options.date[3]) || (val == options.date[2])) {
+                  data.weeks[indic].days[indic2].classname.push('datepickerSelected2');
+                }
+			  }
             }
             if (fromUser.disabled) {
               data.weeks[indic].days[indic2].classname.push('datepickerDisabled');
@@ -490,7 +499,18 @@
               // clicking on the title of a Month Datepicker
               tmp.addMonths(tblIndex - currentCal);
               
-              if(options.mode == 'range') {
+			  if (options.mode == 'tworanges') {
+				var offset = (options.lastSel > 1) ? 2 : 0;
+				var nextSel = (options.lastSel > 1) ? 0 : 2;
+                // range, select the whole month
+                options.date[offset] = (tmp.setHours(0,0,0,0)).valueOf();
+                tmp.addDays(tmp.getMaxDays()-1);
+                tmp.setHours(23,59,59,0);
+                options.date[offset+1] = tmp.valueOf();
+                fillIt = true;
+                changed = true;
+                options.lastSel = nextSel;
+              } else if (options.mode == 'range') {
                 // range, select the whole month
                 options.date[0] = (tmp.setHours(0,0,0,0)).valueOf();
                 tmp.addDays(tmp.getMaxDays()-1);
@@ -562,24 +582,36 @@
                     }
                     break;
                   case 'range':
-                    if (!options.lastSel) {
+				  case 'tworanges':
+					var mapping_other = [1, 0, 3, 2];
+					var mapping_first = [0, 0, 2, 2];
+					var current = options.lastSel;
+					var other = mapping_other[options.lastSel];
+					var first = mapping_first[options.lastSel];
+					var second = first + 1;
+					
+                    if (current == first) {
                       // first click: set to the start of the day
-                      options.date[0] = (tmp.setHours(0,0,0,0)).valueOf();
+                      options.date[first] = (tmp.setHours(0,0,0,0)).valueOf();
                     }
                     // get the very end of the day clicked
                     val = (tmp.setHours(23,59,59,0)).valueOf();
                     
-                    if (val < options.date[0]) {
+                    if (val < options.date[other]) {
                       // second range click < first
                       options.date[1] = options.date[0] + 86399000;  // starting date + 1 day
                       options.date[0] = val - 86399000;  // minus 1 day
 
+                      options.date[second] = options.date[first] + 86399000;  // starting date + 1 day
+                      options.date[first] = val - 86399000;  // minus 1 day
                     } else {
                       // initial range click, or final range click >= first
-                      options.date[1] = val;
+					  options.date[second] = val;  
                     }
                     options.lastSel = !options.lastSel;
                     changedRange = !options.lastSel;
+					var modulo = options.mode == 'range' ? 2 : 4;
+                    options.lastSel = (current + 1) % modulo;
                     break;
                   default:
                     options.date = tmp.valueOf();
@@ -857,6 +889,9 @@
               $(this).bind(options.showOn, show);
             }
           }
+		  if (/range/.test(options.mode)) {
+		    cal.addClass('selectableRange');
+		  }
         });
       },
       
@@ -979,7 +1014,44 @@
             }
           }
         });
-      }
+      },
+	  
+	  /**
+	   * Returns options.lastSel
+	   */
+	  getLastSel: function() {
+		var cal = $('#' + $(this).data('datepickerId'));
+		var options = cal.data('datepicker');
+		return options.lastSel;
+	  },
+	  
+	  /**
+	   * Sets options.lastSel
+	   */
+	  setLastSel: function(lastSel) {
+		var cal = $('#' + $(this).data('datepickerId'));
+		var options = cal.data('datepicker');
+		options.lastSel = parseInt(lastSel);
+	  },
+	  
+	  /**
+	   * Returns options.mode
+	   */
+	  getMode: function() {
+		var cal = $('#' + $(this).data('datepickerId'));
+		var options = cal.data('datepicker');
+		return options.mode;
+	  },
+	  
+	  /**
+	   * Sets options.mode
+	   */
+	  setMode: function(mode) {
+		var cal = $('#' + $(this).data('datepickerId'));
+		var options = cal.data('datepicker');
+		options.mode = mode;
+		fill(cal);
+	  }
     };
   }();  // DatePicker
   
@@ -991,6 +1063,10 @@
     DatePickerSetDate: DatePicker.setDate,
     DatePickerGetDate: DatePicker.getDate,
     DatePickerClear: DatePicker.clear,
+	DatePickerGetLastSel: DatePicker.getLastSel,
+	DatePickerSetLastSel: DatePicker.setLastSel,
+	DatePickerGetMode: DatePicker.getMode,
+	DatePickerSetMode: DatePicker.setMode,
     DatePickerLayout: DatePicker.fixLayout
   });
 

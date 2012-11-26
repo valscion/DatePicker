@@ -23,6 +23,8 @@ Download the latest release, and jQuery.
 
 <img src="https://github.com/foxrunsoftware/DatePicker/blob/master/examples/screenshot-1.png?raw=true" />
 
+<img src="https://github.com/petrkotek/DatePicker/blob/master/examples/screenshot-2.png?raw=true" />
+
 Take a look at the [examples page](http://foxrunsoftware.github.com/DatePicker/) for live, and additional examples.  Then visit the [API reference page](http://foxrunsoftware.github.com/DatePicker/reference.html).
 
 ## Bug tracker

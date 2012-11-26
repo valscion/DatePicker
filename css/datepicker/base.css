@@ -1,17 +1,11 @@
 div.datepicker {
-  position: relative;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
-  width: 196px;
-  height: 147px;
-  position: absolute;
   cursor: default;
-  top: 0;
-  left: 0;
   display: none;
 }
 .datepickerContainer {
-  position: absolute;
+  
 }
 
 /* Hide border divs by default */
@@ -78,11 +72,29 @@ tbody.datepickerDays td.datepickerSelected{
   background: #136A9F;
 }
 tbody.datepickerDays td.datepickerNotInMonth.datepickerSelected {
-  background: #17384d;
+  background: #FFFFFF;
 }
 tbody.datepickerYears td.datepickerSelected,
 tbody.datepickerMonths td.datepickerSelected{
   background: #17384d;
+}
+div.datepicker td.datepickerSelected a, div.datepicker td.datepickerSelected2 a {
+  color:white;
+}
+tbody.datepickerDays td.datepickerSelected2 {
+  background: #86BE2B;
+}
+tbody.datepickerDays td.datepickerSelected.datepickerSelected2 {
+  background: #00B1AB;
+}
+
+tbody.datepickerDays td.datepickerNotInMonth.datepickerSelected2 {
+  background: #FFF;
+}
+
+tbody.datepickerYears td.datepickerSelected2,
+tbody.datepickerMonths td.datepickerSelected2{
+  background: #174d38;
 }
 div.datepicker td.datepickerSelected a {
   color:white;
@@ -108,25 +120,25 @@ a.datepickerMonth {
   line-height: 20px;
   float:left;
 }
+a.datepickerGoNext {
+  float:right;
+}
 div.datepicker th a.datepickerGoNext,
 div.datepicker th a.datepickerGoPrev {
   width: 20px;
   color: #666666;
-  display:none;
+  visibility: hidden;
 }
 div.datepicker th a.datepickerMonth {
-  width:114px;
+  width:106px;
   display:block;
 }
 /* Only display the previous/next arrows on the first/last calendars */
 div.datepicker .datepickerFirstView th a.datepickerGoPrev,
 div.datepicker .datepickerLastView th a.datepickerGoNext {
-  display:block;
+  visibility: visible
 }
-/* Compensate for the space lost by not having a previous arrow */
-div.datepicker th a.datepickerMonth {
-  margin-left:20px;
-}
+
 div.datepicker .datepickerFirstView th a.datepickerMonth {
   margin-left:0;
 }

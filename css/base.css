@@ -1,3 +1,5 @@
+
+
 #datepicker-dropdown {
 	font-size: 12px;
 }
@@ -63,6 +65,21 @@
 	padding: 0;
 }
 
+#datepicker-dropdown select {
+     width: auto;
+    height: 20px;
+     font-size: 90%;
+     vertical-align: top;
+    padding: 0;
+ }
+
+#datepicker-dropdown input {
+    width: auto;
+    height: 10px;
+    font-size: 90%;
+    vertical-align: top;
+}
+
 .datepicker-calendar {
 	float: left;
 }
@@ -94,8 +111,10 @@
 }
 
 .date-ranges-form {
-	margin-left: 10px;
+    margin-left: 10px;
+    float: right;
 }
+
 
 .dr1.active {
 	border-color: #07C
@@ -104,8 +123,12 @@
 	border-color: #86BE2B
 }
 
-.daterange-preset-parameter1 {
-	width: 3em;
+#datepicker-dropdown input.daterange-preset-parameter1 {
+    width: 40px;
+    height: 18px;
+    font-size: 90%;
+    vertical-align: top;
+    padding: 0;
 }
 
 span.aggregation {

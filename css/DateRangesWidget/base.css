@@ -1,3 +1,5 @@
+
+
 #datepicker-dropdown {
 	font-size: 12px;
 }
@@ -53,6 +55,7 @@
 	border: 1px solid #CCCCCC;
 	display:none;
 	padding:10px 0 0 10px;
+    z-index: 99;
 }
 
 /* Remove default border from the custom widget since we're adding our own.  TBD: rework the dropdown calendar to use the default borders */
@@ -61,6 +64,21 @@
 	border: none;
 	border-radius: 0;
 	padding: 0;
+}
+
+#datepicker-dropdown select {
+     width: auto;
+    height: 20px;
+     font-size: 90%;
+     vertical-align: top;
+    padding: 0;
+ }
+
+#datepicker-dropdown input {
+    width: auto;
+    height: 10px;
+    font-size: 90%;
+    vertical-align: top;
 }
 
 .datepicker-calendar {
@@ -94,8 +112,10 @@
 }
 
 .date-ranges-form {
-	margin-left: 10px;
+    margin-left: 10px;
+    float: right;
 }
+
 
 .dr1.active {
 	border-color: #07C
@@ -104,8 +124,12 @@
 	border-color: #86BE2B
 }
 
-.daterange-preset-parameter1 {
-	width: 3em;
+#datepicker-dropdown input.daterange-preset-parameter1 {
+    width: 40px;
+    height: 18px;
+    font-size: 90%;
+    vertical-align: top;
+    padding: 0;
 }
 
 span.aggregation {

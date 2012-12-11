@@ -262,8 +262,12 @@
 				//}
 			}
 			
-			$('.dr2.from', $dropdown).val(dates[2].getDate() + '/' + (dates[2].getMonth()+1) + '/' + dates[2].getFullYear());
-			$('.dr2.to', $dropdown).val(dates[3].getDate() + '/' + (dates[3].getMonth()+1) + '/' + dates[3].getFullYear());
+			if (dates[2]) {
+				$('.dr2.from', $dropdown).val(dates[2].getDate() + '/' + (dates[2].getMonth()+1) + '/' + dates[2].getFullYear());
+			}
+			if (dates[3]) {
+				$('.dr2.to', $dropdown).val(dates[3].getDate() + '/' + (dates[3].getMonth()+1) + '/' + dates[3].getFullYear());
+			}
 		},
 		
 		createElements : function($target) {

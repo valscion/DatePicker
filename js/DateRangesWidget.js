@@ -198,6 +198,7 @@
 			return this.each(function() {
 				var $this = $(this);
 				var data = $this.data('DateRangesWidget');
+                $this.data('test', internal);
          
 				// initialize data in dom element
 				if (!data) {
@@ -207,6 +208,7 @@
 					$this.data('DateRangesWidget', {
 						options : effective_options
 					});
+
 				}
 				internal.createElements($this);
 				internal.updateDateField($this);
@@ -238,7 +240,7 @@
 		
 		refreshForm : function() {
 			var lastSel = $datepicker.DatePickerGetLastSel();
-			
+
 			if ($('.comparison-preset', $dropdown).val() != 'custom') {
 				lastSel = lastSel % 2;
 				$datepicker.DatePickerSetLastSel(lastSel);
@@ -259,21 +261,16 @@
 				$('.dr1.from', $dropdown).val(newFrom);
 				$('.dr1.to', $dropdown).val(newTo);
 
-                $('.dr1.from_millis', $dropdown).val(dates[0]);
-                $('.dr1.to_millis', $dropdown).val(dates[1]);
-
-				//console.log('origin', origin);
-				//if (origin != 'daterange-preset') {
-					//$('.daterange-preset').val('custom');
-					//$('.daterange-preset').change();
-				//}
 			}
+
+            $('.dr1.from_millis', $dropdown).val(dates[0].getTime());
+            $('.dr1.to_millis', $dropdown).val(dates[1].getTime());
 			
 			$('.dr2.from', $dropdown).val(dates[2].getDate() + '/' + (dates[2].getMonth()+1) + '/' + dates[2].getFullYear());
 			$('.dr2.to', $dropdown).val(dates[3].getDate() + '/' + (dates[3].getMonth()+1) + '/' + dates[3].getFullYear());
 
-            $('.dr2.from_millis', $dropdown).val(dates[2]);
-            $('.dr2.to_millis', $dropdown).val(dates[3]);
+            $('.dr2.from_millis', $dropdown).val(dates[2].getTime());
+            $('.dr2.to_millis', $dropdown).val(dates[3].getTime());
 		},
 		
 		createElements : function($target) {
@@ -323,8 +320,10 @@
 							'<input type="text" class="dr dr2 from" lastSel="2" /> - <input type="text" class="dr dr2 to" lastSel="3" />'+
                             '<input type="hidden" class="dr dr2 from_millis" lastSel="2" /><input type="hidden" class="dr dr2 to_millis" lastSel="3" />'+
            			'</div>'+
-						'<button class="btn btn-small" id="button-ok">Ok</button>'+
-						'<button class="btn btn-small" id="button-cancel">Cancel</button>'+
+           				'<div class="btn-group">'+
+						'<button class="btn btn-mini" id="button-ok">Apply</button>'+
+						'<button class="btn btn-mini" id="button-cancel">Cancel</button>'+
+						'</div>'+
 					'</div>'+
 				'</div>');
 				$dropdown.appendTo($('body'));
@@ -413,7 +412,7 @@
 				$('.dr', $dropdown).click(function() {
 					// set active date field for datepicker
 					$datepicker.DatePickerSetLastSel($(this).attr('lastSel'));
-					internal.refreshForm();
+					//internal.refreshForm(); // don't refresh
 				});
 				
 				/**

@@ -2,10 +2,9 @@
  * DatePicker 1.0.0
  * 
  * A jQuery-based DatePicker that provides an easy way of creating both single
- * and multi-viewed calendars capable of accepting single date, date range, two
- * date ranges and multiple selected dates. Easily styled with two example
- * styles provided: an attractive 'dark' style, and a Google Analytics-like
- * 'clean' style.
+ * and multi-viewed calendars capable of accepting single, range, and multiple
+ * selected dates.  Easily styled with two example styles provided: an attractive
+ * 'dark' style, and a Google Analytics-like 'clean' style.
  * 
  * View project page for Examples and Documentation:
  * http://foxrunsoftware.github.com/DatePicker/
@@ -13,7 +12,7 @@
  * This project is distinct from and not affiliated with the jquery.ui.datepicker.
  * 
  * Copyright 2012, Justin Stern (www.foxrunsoftware.net)
-  * Dual licensed under the MIT and GPL Version 2 licenses.
+ * Dual licensed under the MIT and GPL Version 2 licenses.
  * 
  * Based on Work by Original Author: Stefan Petre www.eyecon.ro
  * 
@@ -21,7 +20,8 @@
  *   jquery.js
  */
 (function ($) {
-  var DatePicker = function () {
+  var cache = {}, tmpl,
+  DatePicker = function () {
     var ids = {},
       views = {
         years: 'datepickerViewYears',
@@ -205,7 +205,7 @@
          *         disabled: if true, date cell will be disabled
          *         className: css class name to add to the cell
          */
-        onRenderCell: function() {return {}},
+        onRenderCell: function() { return {} },
         /* 
          * Callback, invoked when a date is selected, with 'this' referring to
          * the HTMLElement that DatePicker was invoked upon.
@@ -217,15 +217,24 @@
          * @param HTMLElement el the DatePicker element, ie the element that DatePicker was invoked upon
          */
         onChange: function() { },
+        /* 
+         * Callback, invoked when a date range is selected, with 'this' referring to
+         * the HTMLElement that DatePicker was invoked upon.
+         * 
+         * @param dates: Selected date(s), ie an array containing a 'from' and 'to' Date objects. 
+         * @param HTMLElement el the DatePicker element, ie the element that DatePicker was invoked upon
+         */
+        onRangeChange: function() { },
         /**
          * Invoked before a non-inline datepicker is shown, with 'this'
          * referring to the HTMLElement that DatePicker was invoked upon, ie
          * the trigger element
          * 
-         * @param HTMLDivElement el The datepicker container element, ie the div with class 'datepicker'
+         * @param HTMLDivElement el The datepicker container element, ie the div with class 'datepicker'.
          * @return true to allow the datepicker to be shown, false to keep it hidden
          */
-        onBeforeShow: function() {return true},
+
+        onBeforeShow: function() { return true },
         /**
          * Invoked after a non-inline datepicker is shown, with 'this'
          * referring to the HTMLElement that DatePicker was invoked upon, ie
@@ -242,7 +251,7 @@
          * @param HTMLDivElement el The datepicker container element, ie the div with class 'datepicker'
          * @return true to allow the datepicker to be hidden, false to keep it visible
          */
-        onBeforeHide: function() {return true},
+        onBeforeHide: function() { return true },
         /**
          * Invoked after a non-inline datepicker is hidden, with 'this'
          * referring to the HTMLElement that DatePicker was invoked upon, ie
@@ -272,7 +281,7 @@
         /**
          * Private option, used to determine when a range is selected
          */
-        lastSel: 0
+        lastSel: false
       },
       
       /**
@@ -449,7 +458,6 @@
         var tbl = cal.find('table:first').get(0);
         var width = tbl.offsetWidth;
         var height = tbl.offsetHeight;
-		/*
         cal.css({
           width: width + options.extraWidth + 'px',
           height: height + options.extraHeight + 'px'
@@ -457,7 +465,6 @@
           width: width + 'px',
           height: height + 'px'
         });
-		*/
       },
       
       /**
@@ -466,7 +473,6 @@
        * the title, next/previous, or a date cell is clicked on.
        */
       click = function(ev) {
-		ev.preventDefault();
         if ($(ev.target).is('span')) {
           ev.target = ev.target.parentNode;
         }
@@ -482,9 +488,10 @@
           var tblIndex = $('table', this).index(tblEl.get(0)) - 1;
           var tmp = new Date(options.current);
           var changed = false;
+          var changedRange = false;
           var fillIt = false;
           var currentCal = Math.floor(options.calendars/2);
-		  
+          
           if (parentEl.is('th')) {
             // clicking the calendar title
             
@@ -578,28 +585,66 @@
 				  case 'tworanges':
 					var mapping_other = [1, 0, 3, 2];
 					var mapping_first = [0, 0, 2, 2];
+					options.lastSel = options.lastSel+1-1; // force to num
 					var current = options.lastSel;
 					var other = mapping_other[options.lastSel];
 					var first = mapping_first[options.lastSel];
 					var second = first + 1;
-					
-                    if (current == first) {
-                      // first click: set to the start of the day
-                      options.date[first] = (tmp.setHours(0,0,0,0)).valueOf();
-                    }
-                    // get the very end of the day clicked
-                    val = (tmp.setHours(23,59,59,0)).valueOf();
-                    
-                    if (val < options.date[other]) {
-                      // second range click < first
-                      options.date[second] = options.date[first] + 86399000;  // starting date + 1 day
-                      options.date[first] = val - 86399000;  // minus 1 day
-                    } else {
-                      // initial range click, or final range click >= first
-					  options.date[second] = val;  
-                    }
-					var modulo = options.mode == 'range' ? 2 : 4;
-                    options.lastSel = (current + 1) % modulo;
+					if (options.weeklyMode)
+					{
+						var day = tmp.getDay();
+						var diff = (day == 0 ? -6 : 1) - day;
+						var monday = new Date(tmp.getTime()+diff*24*3600000); // return closest monday
+						var sunday = new Date(monday.getTime()+6*24*3600000); // return next sunday 
+						changedRange = true;
+						options.date[first] = (monday.setHours(0,0,0,0)).valueOf();
+						options.date[second] = (sunday.setHours(23,59,59,999)).valueOf();
+		                var modulo = options.mode == 'range' ? 2 : 4;
+		                options.lastSel = (current + 2) % modulo;					
+		            }
+					else if (options.monthlyMode)
+					{
+						tmp.setDate(1);
+						var year = tmp.getFullYear();
+						var month = tmp.getMonth() + 1
+						if (month == 12)
+						{
+							year++;
+							month = 0;
+						}
+						var firstDayNextMonth = new Date(year, month, 1, 23, 59, 59 ,999);
+						var lastMonthDate = new Date(firstDayNextMonth.getTime()-24*3600000); // return last day of this month 
+						changedRange = true;
+						options.date[first] = (tmp.setHours(0,0,0,0)).valueOf();
+						options.date[second] = lastMonthDate.valueOf();
+		                var modulo = options.mode == 'range' ? 2 : 4;
+		                options.lastSel = (current + 2) % modulo;					
+		            }
+					else
+					{
+	                    if (current == first) {
+	                        // first click: set to the start of the day
+	                        options.date[first] = (tmp.setHours(0,0,0,0)).valueOf();
+	                      }
+	                      // get the very end of the day clicked
+	                      val = (tmp.setHours(23,59,59,0)).valueOf();
+	                      
+	                      if (val < options.date[other]) {
+	                        // second range click < first
+	                        options.date[1] = options.date[0] + 86399000;  // starting date + 1 day
+	                        options.date[0] = val - 86399000;  // minus 1 day
+
+	                        options.date[second] = options.date[first] + 86399000;  // starting date + 1 day
+	                        options.date[first] = val - 86399000;  // minus 1 day
+	                      } else {
+	                        // initial range click, or final range click >= first
+	  					  options.date[second] = val;  
+	                      }
+	                      options.lastSel = !options.lastSel;
+	                      changedRange = !options.lastSel;
+	  	                var modulo = options.mode == 'range' ? 2 : 4;
+		                options.lastSel = (current + 1) % modulo;
+					}
                     break;
                   default:
                     options.date = tmp.valueOf();
@@ -614,6 +659,9 @@
           }
           if(changed) {
             options.onChange.apply(this, prepareDate(options));
+          }
+          if(changedRange) {
+            options.onRangeChange.apply(this, prepareDate(options));
           }
         }
         return false;
@@ -643,7 +691,7 @@
             dates.push(new Date(val));
           });
         }
-        return [dates, options.el, options];
+        return [dates, options.el];
       },
       
       /**
@@ -695,6 +743,7 @@
           var calEl = cal.get(0);
           var options = cal.data('datepicker');
           
+          var test = options.onBeforeShow.apply(this, [calEl]);
           if(options.onBeforeShow.apply(this, [calEl]) == false) {
             return;
           }
@@ -704,6 +753,7 @@
           var viewPort = getViewport();
           var top = pos.top;
           var left = pos.left;
+          var oldDisplay = $.curCSS(calEl, 'display');
           cal.css({
             visibility: 'hidden',
             display: 'block'
@@ -1052,13 +1102,8 @@
 	DatePickerSetMode: DatePicker.setMode,
     DatePickerLayout: DatePicker.fixLayout
   });
-})(jQuery);
 
-(function(){
-  // within here, 'this' refers to the window object
-  var cache = {};
-  
-  this.tmpl = function tmpl(str, data){
+  tmpl = function tmpl(str, data){
     // Figure out if we're getting a template, or if we need to
     // load the template - and be sure to cache the result.
     var fn = !/\W/.test(str) ?
@@ -1087,4 +1132,5 @@
     // Provide some basic currying to the user
     return data ? fn( data ) : fn;
   };
-})();
+
+})(jQuery);

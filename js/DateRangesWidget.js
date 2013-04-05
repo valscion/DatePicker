@@ -18,10 +18,12 @@
 	var default_options = {
 		
 		aggregations : ['-', 'daily', 'weekly', 'monthly', 'yearly'],
-		values : {}
-		
+        values : {}
+
 	};
-	
+
+    var default_aggregation = 'daily';
+
 	var db = {
 		
 		aggregations : {
@@ -196,6 +198,7 @@
 			return this.each(function() {
 				var $this = $(this);
 				var data = $this.data('DateRangesWidget');
+                $this.data('test', internal);
          
 				// initialize data in dom element
 				if (!data) {
@@ -205,9 +208,12 @@
 					$this.data('DateRangesWidget', {
 						options : effective_options
 					});
+
 				}
 				internal.createElements($this);
 				internal.updateDateField($this);
+
+
 			});
 		}
 		
@@ -234,7 +240,7 @@
 		
 		refreshForm : function() {
 			var lastSel = $datepicker.DatePickerGetLastSel();
-			
+
 			if ($('.comparison-preset', $dropdown).val() != 'custom') {
 				lastSel = lastSel % 2;
 				$datepicker.DatePickerSetLastSel(lastSel);
@@ -254,13 +260,11 @@
 			if (newFrom != oldFrom || newTo != oldTo) {
 				$('.dr1.from', $dropdown).val(newFrom);
 				$('.dr1.to', $dropdown).val(newTo);
-				
-				//console.log('origin', origin);
-				//if (origin != 'daterange-preset') {
-					//$('.daterange-preset').val('custom');
-					//$('.daterange-preset').change();
-				//}
+
 			}
+
+            $('.dr1.from_millis', $dropdown).val(dates[0].getTime());
+            $('.dr1.to_millis', $dropdown).val(dates[1].getTime());
 			
 			if (dates[2]) {
 				$('.dr2.from', $dropdown).val(dates[2].getDate() + '/' + (dates[2].getMonth()+1) + '/' + dates[2].getFullYear());
@@ -303,9 +307,10 @@
 								'</span>'+
 							'</div>'+
 							'<input type="text" class="dr dr1 from" lastSel="0" /> - <input type="text" class="dr dr1 to" lastSel="1" />'+
+                            '<input type="hidden" class="dr dr1 from_millis" lastSel="2" /><input type="hidden" class="dr dr1 to_millis" lastSel="3" />'+
 						'</div>'+
 						'<div>'+
-							'<input type="checkbox" checked="checked" class="enable-comparison" /> <label for="enableComparison">Compare to:</label>'+
+							'<input type="checkbox" checked="checked" class="enable-comparison" /> Compare to:'+
 							'<select class="comparison-preset">'+
 								'<option value="custom">Custom</option>'+
 								'<option value="previousperiod" selected="selected">Previous period</option>'+
@@ -314,9 +319,12 @@
 						'</div>'+
 						'<div class="comparison-daterange">'+
 							'<input type="text" class="dr dr2 from" lastSel="2" /> - <input type="text" class="dr dr2 to" lastSel="3" />'+
+                            '<input type="hidden" class="dr dr2 from_millis" lastSel="2" /><input type="hidden" class="dr dr2 to_millis" lastSel="3" />'+
+           			'</div>'+
+           				'<div class="btn-group">'+
+						'<button class="btn btn-mini" id="button-ok">Apply</button>'+
+						'<button class="btn btn-mini" id="button-cancel">Cancel</button>'+
 						'</div>'+
-						'<button class="ok">Ok</button>'+
-						'<button class="cancel">Cancel</button>'+
 					'</div>'+
 				'</div>');
 				$dropdown.appendTo($('body'));
@@ -332,7 +340,10 @@
 				
 				$enableComparison = $('.enable-comparison', $dropdown);
 				$comparisonPreset = $('.comparison-preset', $dropdown);
-				
+
+
+
+
 				// TODO: inherit options from DRW options
 				$datepicker.DatePicker({
 					mode: 'tworanges',
@@ -343,6 +354,7 @@
 					onChange: function(dates, el, options) {
 						// user clicked on datepicker
 						internal.setDaterangePreset('custom');
+                        console.log("onchange datepicker");
 					}
 				});
 				
@@ -360,7 +372,7 @@
 				$daterangePreset.change(function() {
 					var date_preset = internal.getDaterangePreset();
 					if (date_preset.parameters) {
-						console.log(internal.getParameter1());
+						//console.log(internal.getParameter1());
 						if (!$.isNumeric(internal.getParameter1())) {
 							internal.setParameter1(date_preset.defaults.parameter1);
 						}
@@ -375,7 +387,7 @@
 				
 				$parameter1.change(function() {
 					var p1 = internal.getParameter1();
-					console.log(p1);
+					//console.log(p1);
 					if (!$.isNumeric(p1) || p1 < 1)
 						internal.setParameter1(1);
 					internal.recalculateDaterange();
@@ -401,13 +413,13 @@
 				$('.dr', $dropdown).click(function() {
 					// set active date field for datepicker
 					$datepicker.DatePickerSetLastSel($(this).attr('lastSel'));
-					internal.refreshForm();
+					//internal.refreshForm(); // don't refresh
 				});
 				
 				/**
 				 * Handle clicking on OK button.
 				 */
-				$('button.ok', $dropdown).click(function() {
+				$('#button-ok', $dropdown).click(function() {
 					internal.retractDropdown($current_target);
 					internal.saveValues($current_target);
 					internal.updateDateField($current_target);
@@ -417,8 +429,8 @@
 				/**
 				 * Handle clicking on OK button.
 				 */
-				$('button.cancel', $dropdown).click(function() {
-					console.log('cancel')
+				$('#button-cancel', $dropdown).click(function() {
+					//console.log('cancel')
 					var $this = $(this);
 					internal.retractDropdown($current_target);
 					return false;
@@ -431,7 +443,7 @@
 			 */
 			$target.bind('click', function() {
 				var $this = $(this);
-				console.log($this);
+				//console.log($this);
 				//console.log('clicked on ', $this);
 				if ($this.hasClass('DRWClosed')) {
 					internal.expandDropdown($this);
@@ -449,7 +461,7 @@
 			var date_preset = internal.getDaterangePreset();
 			
 			var dates = $datepicker.DatePickerGetDate()[0];
-			console.log('original dates', dates);
+			//console.log('original dates', dates);
 			
 			// TODO: remove
 			if (date_preset.dates == undefined) throw date_preset.title + " doesn't have dates()";
@@ -459,7 +471,7 @@
 				dates[0] = d[0];
 				dates[1] = d[1];
 			}
-			console.log('new dates', dates);
+			//console.log('new dates', dates);
 			$datepicker.DatePickerSetDate(dates);
 			internal.recalculateComparison();
 			/*
@@ -474,7 +486,7 @@
 			var dates = $datepicker.DatePickerGetDate()[0];
 			if (dates.length >= 2) {
 				var comparisonPreset = internal.getComparisonPreset();
-				console.log(comparisonPreset);
+				//console.log(comparisonPreset);
 				switch (comparisonPreset) {
 					case 'previousperiod':
 						var days = parseInt((dates[1]-dates[0])/(24*3600*1000));
@@ -511,7 +523,7 @@
 		 */
 		loadValues : function($target) {
 			var values = $target.data('DateRangesWidget').options.values;
-			console.log('load', values);
+			//console.log('load', values);
 			// handle initial values
 			$('.dr1.from', $dropdown).val(values.dr1from);
 			$('.dr1.from', $dropdown).change();
@@ -549,31 +561,48 @@
 			values.parameter1 = internal.getParameter1();
 			values.dr1from = $('.dr1.from', $dropdown).val()
 			values.dr1to = $('.dr1.to', $dropdown).val()
+            values.dr1from_millis = $('.dr1.from_millis', $dropdown).val()
+            values.dr1to_millis = $('.dr1.to_millis', $dropdown).val()
 			
 			values.comparisonEnabled = internal.getComparisonEnabled();
 			values.comparisonPreset = internal.getComparisonPreset();
 			values.dr2from = $('.dr2.from', $dropdown).val()
 			values.dr2to = $('.dr2.to', $dropdown).val()
+
+            values.dr2from_millis = $('.dr2.from_millis', $dropdown).val()
+            values.dr2to_millis = $('.dr2.to_millis', $dropdown).val()
 			$target.data('DateRangesWidget', data);
-			console.log('save', data);
+
+            if($target.data().DateRangesWidget.options.onChange)
+                $target.data().DateRangesWidget.options.onChange(values);
+
 		},
+
 		
 		/**
 		 * Updates target div with data from target element's data
 		 */
 		updateDateField : function($target) {
 			var values = $target.data("DateRangesWidget").options.values;
-			console.log('values', values);
+			//console.log('values', values);
 			if (values.aggregation) {
 				$('span.aggregation', $target).text(values.aggregation);
 				$('span.aggregation', $target).show();
 			} else {
 				$('span.aggregation', $target).hide();
 			}
+
+
+
 			if (values.dr1from && values.dr1to) {
 				$('span.main', $target).text(values.dr1from + ' - ' + values.dr1to);
 				
-			} else {
+			} else if(values.daterangePreset) {
+                var dates = db.date_presets[values.daterangePreset].dates();
+                $('span.main', $target).text(dates[0] + ' - ' + dates[1]);
+
+            }
+            else {
 				$('span.main', $target).text('N/A');
 			}
 			if (values.comparisonEnabled && values.dr2from && values.dr2to) {
@@ -584,6 +613,8 @@
 				$('span.comparison-divider', $target).hide();
 				$('span.comparison', $target).hide();
 			}
+
+
 			return true;
 		},
 		
@@ -626,8 +657,11 @@
 		
 		populateDateRangePresets : function() {
 			var aggregation = internal.getAggregation();
-			var main_presets_keys = db.aggregations[aggregation].presets;
-			var $other_presets = $('<optgroup/>', {label : 'Other presets'})
+            if(!aggregation)
+                aggregation = default_aggregation;
+			var main_presets_keys =  db.aggregations[aggregation].presets;
+
+            var $other_presets = $('<optgroup/>', {label : 'Other presets'})
 			var valueBackup = $daterangePreset.val();
 			
 			$daterangePreset.html('');
@@ -737,7 +771,9 @@
 	};
 	
 	$.fn.DateRangesWidget = function(method) {
-    
+
+
+
 		if (methods[method]) {
 			return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
 		} else if (typeof method === 'object' || !method) {
